@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ServerSettings>
+  <TargetNetID>192.168.56.1.1.1</TargetNetID>
+  <LogMode>2</LogMode>
+  <LogPath>C:\TwinCAT\Functions\TF6420-Database-Server\Win32\Server</LogPath>
+  <LogMaxLength>10</LogMaxLength>
+  <Impersonate>False</Impersonate>
+  <DBNULLAllowed>False</DBNULLAllowed>
+  <DBCommandTimeout>30</DBCommandTimeout>
+  <DBConnectionTimeout>15</DBConnectionTimeout>
+  <MaxByteArrayLength>256</MaxByteArrayLength>
+  <MaxStringLength>256</MaxStringLength>
+  <WSTRINGSupportActive>False</WSTRINGSupportActive>
+  <TcDbSrvProject>
+    <tcdbsrvdbCompile Include="TcDatabaseServer1\MyDB\MyDB.tcdbsrvdb" />
+    <tcdbsrvautoCompile Include="TcDatabaseServer1\MyDB\AutoLogGroup_Value\AutoLogGroup_Value.tcdbsrvauto" />
+    <tcdbsrvadsCompile Include="TcDatabaseServer1\MyDB\AutoLogGroup_Value\AdsDevice.tcdbsrvads" />
+    <tcdbsrvsymCompile Include="TcDatabaseServer1\MyDB\AutoLogGroup_Value\Symbols.tcdbsrvsym" />
+    <tcdbsrvtblCompile Include="TcDatabaseServer1\MyDB\AutoLogGroup_Value\DBTable.tcdbsrvtbl" />
+  </TcDbSrvProject>
+</ServerSettings>

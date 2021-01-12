@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="MAIN" Id="{0c87c2e9-0ed0-46c3-8dfa-d45b3ec3eb06}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	//Các biến điều khiển thao tác	
+	bMainAddRecord : BOOL:= FALSE;
+	bMainReadRecord : BOOL:= FALSE;	
+	bMainSQLCmd : BOOL := FALSE;
+	//bMainSQLCmd_ : BOOL:= FALSE;
+	myDBID : UDINT:=1;//ID của Database
+	
+	//Các biến đánh dấu
+	nState_write : UINT :=111;
+	nState_read : UINT :=111;
+	
+	//Các biến phục vụ việc đọc record
+	fbPLCDBRead : FB_PLCDBReadEvt (sNetID := '', tTimeout := T#5S);
+	ColumnNames_read : ARRAY [0..4] OF STRING(50);
+	sMyTableName : T_MaxString:='Table02';
+	myRecordRead : recordStruct;
+	tcMessage_read : I_TcMessage;
+	
+	//Các biến phục vụ cho việc add record
+	fbPLCDBWrite : FB_PLCDBWriteEvt (sNetID := '', tTimeout := T#5S);
+	ColumnNames_write : ARRAY [0..4] OF STRING(50);
+	nValue1Add : INT:= 200;
+	nValue2Add : INT:= 56;
+	bValue3Add : BOOL:= TRUE;
+	bValue4Add : BOOL:= FALSE;
+	myRecordAdd : recordStruct;
+	tcMessage_write : I_TcMessage;
+	
+	//Các biến phục vụ cho việc thực hiện câu lệnh SQL (Không trả về kq)
+	fbPLCDBCmd : FB_PLCDBCmdEvt (sNetID:='', tTimeout := T#5S);
+	sCmd : STRING (1000);
+	myRecordAddSQL : recordStruct_;
+	aPara : ARRAY[0..3] OF ST_ExpParameter;
+	tcMessage_SQL :I_TcMessage;
+	nState_SQL: UINT:=111;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+//Chương trình đọc Reacord cuối cùng của Database
+IF bMainReadRecord=TRUE THEN
+	
+	ColumnNames_read[0] := 'ID';
+	ColumnNames_read[1] := 'Value1';
+	ColumnNames_read[2] := 'Value2';
+	ColumnNames_read[3] := 'Value3';
+	ColumnNames_read[4] := 'Value4';
+	
+	IF fbPLCDBRead.ReadStruct(
+		hDBID:= myDBID,
+		sTableName:= sMyTableName,
+		pColumnNames:= ADR(ColumnNames_read),
+		cbColumnNames:= SIZEOF(ColumnNames_read),
+		sOrderByColumn:= 'ID', 
+		eOrderType:= E_OrderType.DESC, 
+		nStartIndex:= 0, 
+		nRecordCount:= 1, 
+		pData:= ADR(myRecordRead), 
+		cbData:= SIZEOF(myRecordRead)
+	)
+	THEN
+		IF fbPLCDBRead.bError THEN
+		tcMessage_read := fbPLCDBRead.ipTcResult;
+		nState_read := 255;
+		ELSE
+		nState_read := 0;		
+		END_IF
+		bMainReadRecord:=FALSE;
+	END_IF	
+END_IF
+
+//Chương trình add thêm Record vào Database
+IF bMainAddRecord=TRUE THEN
+	ColumnNames_write[0] := 'ID';
+	ColumnNames_write[1] := 'Value1';
+	ColumnNames_write[2] := 'Value2';
+	ColumnNames_write[3] := 'Value3';
+	ColumnNames_write[4] := 'Value4';
+	
+	myRecordAdd.nValue1:=nValue1Add;
+	myRecordAdd.nValue2:=nValue2Add;
+	myRecordAdd.bValue3:=bValue3Add;
+	myRecordAdd.bValue4:=bValue4Add;
+	
+	IF fbPLCDBWrite.WriteStruct(
+		hDBID:= myDBID,
+		sTableName:= sMyTableName,
+		pRecord:= ADR(myRecordAdd),
+		cbRecord:= SIZEOF(myRecordAdd),
+		pColumnNames:= ADR(ColumnNames_write) ,
+		cbColumnNames:= SIZEOF(ColumnNames_write)
+	)
+	THEN
+		IF fbPLCDBWrite.bError THEN
+		tcMessage_write := fbPLCDBWrite.ipTcResult;
+		nState_write := 255;
+		ELSE
+		nState_write := 0;
+		
+		END_IF
+		bMainAddRecord := FALSE;
+	END_IF	
+END_IF
+
+//Chương trình thực hiện câu lệnh SQL (Không trả về kq)
+IF bMainSQLCmd = TRUE THEN
+	myRecordAddSQL.nValue1 :=999;
+	myRecordAddSQL.nValue2 :=1999;
+	myRecordAddSQL.bValue3 := TRUE;
+	myRecordAddSQL.bValue4 := FALSE;
+	//Khởi tạo các Para cho các placeholder
+	aPara[0].sParaName:='Value1_V'; aPara[0].eParaType:= E_ExpParameterType.Int16; aPara[0].nParaSize:= 2;
+	aPara[1].sParaName:='Value2_V'; aPara[1].eParaType:= E_ExpParameterType.Int16; aPara[1].nParaSize:= 2;
+	aPara[2].sParaName:='Value3_V'; aPara[2].eParaType:= E_ExpParameterType.Boolean; aPara[2].nParaSize:= 1;
+	aPara[3].sParaName:='Value4_V'; aPara[3].eParaType:= E_ExpParameterType.Boolean; aPara[3].nParaSize:= 1;
+	
+	sCmd := 'INSERT INTO Table02 (Value1, Value2, Value3, Value4) VALUES ({Value1_V}, {Value2_V}, {Value3_V}, {Value4_V})';
+	IF fbPLCDBCmd.Execute(
+		hDBID:= myDBID,
+		pExpression:= ADR(sCmd),
+		cbExpression:= SIZEOF(sCmd),
+		pData:= ADR(myRecordAddSQL),
+		cbData:= SIZEOF(myRecordAddSQL),
+		pParameter:= ADR(aPara),
+		cbParameter:= SIZEOF(aPara))
+	THEN
+		IF fbPLCDBCmd.bError THEN
+		tcMessage_SQL := fbPLCDBCmd.ipTcResult;
+		nState_SQL := 255;
+		ELSE
+		nState_SQL := 0;	
+		bMainSQLCmd := FALSE;
+		END_IF
+	END_IF	
+END_IF
+
+
+	
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="56" Count="2" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="47" Count="3" />
+      <LineId Id="26" Count="17" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="71" Count="2" />
+      <LineId Id="92" Count="3" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="107" Count="13" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="175" Count="3" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="169" Count="4" />
+      <LineId Id="181" Count="13" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="209" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

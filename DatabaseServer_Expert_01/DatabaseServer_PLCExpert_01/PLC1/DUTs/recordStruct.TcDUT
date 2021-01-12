@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <DUT Name="recordStruct" Id="{cab9b676-27b8-486e-b778-56c1927feae5}">
+    <Declaration><![CDATA[TYPE recordStruct :
+STRUCT
+	nID : LINT;
+	nValue1 : INT;
+	nValue2 : INT;
+	bValue3 : BOOL;
+	bValue4 : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

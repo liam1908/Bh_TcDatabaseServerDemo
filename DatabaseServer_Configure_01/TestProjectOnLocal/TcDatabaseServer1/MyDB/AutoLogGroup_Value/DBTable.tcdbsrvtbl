@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Table>
+  <ID>1</ID>
+  <Name>DBTable</Name>
+  <TableName>TableValue2</TableName>
+  <FailOverTableName />
+  <TableMode>CUSTOM</TableMode>
+  <AdditionalSettings />
+  <Columns>
+    <Column>
+      <Name>ID</Name>
+      <Type>BigInt</Type>
+      <Mode>AUTOID</Mode>
+      <MappedSymbolID>0</MappedSymbolID>
+    </Column>
+    <Column>
+      <Name>Value1</Name>
+      <Type>SmallInt</Type>
+      <Mode>MAPPED</Mode>
+      <MappedSymbolID>1</MappedSymbolID>
+    </Column>
+    <Column>
+      <Name>Value2</Name>
+      <Type>SmallInt</Type>
+      <Mode>MAPPED</Mode>
+      <MappedSymbolID>2</MappedSymbolID>
+    </Column>
+    <Column>
+      <Name>Value3</Name>
+      <Type>Bit</Type>
+      <Mode>MAPPED</Mode>
+      <MappedSymbolID>3</MappedSymbolID>
+    </Column>
+    <Column>
+      <Name>Value4</Name>
+      <Type>Bit</Type>
+      <Mode>MAPPED</Mode>
+      <MappedSymbolID>4</MappedSymbolID>
+    </Column>
+  </Columns>
+</Table>

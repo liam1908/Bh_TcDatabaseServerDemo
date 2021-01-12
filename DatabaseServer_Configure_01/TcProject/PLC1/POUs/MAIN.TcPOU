@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.4">
+  <POU Name="MAIN" Id="{80807273-2ad2-4ea4-96c0-c91371f3fa21}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	intValue1 : INT;
+	intValue2 : INT;
+	bValue3 : BOOL;
+	bValue4 : BOOL;	
+	fbTON : TON;
+	TEMP : BOOL:=FALSE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbTON(IN := NOT fbTON.Q, PT:= T#1S);
+IF (fbTON.Q = TRUE) THEN
+	IF (intValue1 <1000) THEN
+		intValue1 := intValue1 +1;
+		ELSE
+		intValue1 :=0;		
+	END_IF
+	IF (intValue2 <1000) THEN
+		intValue2 := intValue2 +2;
+		ELSE
+		intValue2 :=0;		
+	END_IF
+	bValue3 := NOT bValue3;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="12" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
